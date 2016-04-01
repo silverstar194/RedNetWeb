@@ -37,134 +37,44 @@ public class Post {
 	private String content;
 	
 	
-	/** The time. */
+	/** The time posted. */
 	private long time;
 	
-	/** The user id. */
-	private String userID;
+	/** The username of poster. */
+	private User username;
 	
 	/** The post id. */
 	private String postID;
-	
-	/** The end time. */
-	private long endTime;
 
-	/** The user. */
-	private User user;
+	/**The subreddit*/
+	private String subreddit;
 	
-	private boolean deleted; // always false unless deleted
-	
-	/** The number spam reports. */
-	private int spamCount;
-
-	/** Is the post marked as spam */
-	private boolean spam;
-
 	/**
 	 * Instantiates a new post.
 	 *
 	 * @param title: the title
 	 * @param content: the content
-	 * @param latitude: the latitude of post
-	 * @param longitude: the longitude of post
 	 * @param userID: the user id
 	 * @param endTime: the expiration time
 	 */
-	public Post(String title, String content, double latitude, double longitude, String userID, long endTime, boolean deleted , int spamCount, boolean spam){
+	public Post(String title, String content, User username){
+		
+		//for mysql storage
 		if (content.contains("'") || title.contains("'")) 
 		{
 			content = content.replace("'", "''");
 			title = title.replace("'", "''");
 		}
 		
+		this.username = username;
 		this.title = title;
 		this.content = content;
 		this.postID = idGenerator();
-		this.userID = userID;
-		this.endTime = endTime;
 		this.time=System.currentTimeMillis();
-		this.deleted = deleted;
-		this.spamCount = spamCount;
-		this.spam = spam;
+
 
 	}
 
-	/**
-	 * Instantiates a new post.
-	 *
-	 * @param title: the title
-	 * @param content: the content
-	 * @param userID: the user id
-	 * @param postID: the post id
-	 * @param time: the time post was made
-	 * @param endTime: the expiration time
-	 */
-	public Post(String title, String content, String userID, String postID, long time, long endTime, boolean deleted, int spamCount, boolean spam){
-		if (content.contains("'") || title.contains("'")) 
-		{
-			content = content.replace("'", "''");
-			title = title.replace("'", "''");
-		}
-		this.title = title;
-		this.content = content;
-		this.postID = postID;
-		this.userID = userID;
-		this.endTime = endTime;
-		this.time=time; 
-		this.user = new User(userID);
-		this.deleted = deleted;
-		this.spamCount = spamCount;
-		this.spam = spam;
-	}
-
-	/**
-	 * Instantiates a new post.
-	 *
-	 * @param id: the id of post
-	 */
-	public Post(String id){
-		DataBase dataBase = new DataBase();
-		Connection dataBaseConn = null;
-		try {
-			dataBaseConn = dataBase.getConnection();
-
-
-			String command ="SELECT * FROM Post WHERE postID='"+id+"'";
-
-			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
-			while(rs.next()){
-				this.title = rs.getString("title");
-				this.content = rs.getString("content");
-				this.userID = rs.getString("userID");
-				this.postID = id;
-				this.endTime = Long.parseLong(rs.getString("endTime"));
-				this.time = rs.getLong("time");
-				this.deleted = Boolean.parseBoolean(rs.getString("deleted"));
-				this.spamCount = Integer.parseInt(rs.getString("spamCount"));
-			}
-
-			System.out.println("=====USER CREATED FROM DATABASE=====");
-
-		} catch (Exception e) {
-			System.out.println("=====ERROR GETTING USER FROM DATABASE=====");
-			e.printStackTrace();
-		}finally{
-			try {
-				dataBaseConn.close();
-			} catch (SQLException e) {
-				System.out.println("CANNOT CLOSE CONNECTION TO MYSQL");
-				e.printStackTrace();
-			}
-		}
-	}
-
-
-
-	/**
-	 * Instantiates a new blank post.
-	 */
-	public Post(){
-	}
 	
 	/**
 	 * Gets the title.
@@ -176,14 +86,6 @@ public class Post {
 		return this.title;
 	}
 	
-	/**
-	 * Gets the spam count.
-	 *
-	 * @return the spam count
-	 */
-	public int getSpamCount(){
-		return this.spamCount;
-	}
 
 	/**
 	 * Gets the content.
@@ -203,23 +105,14 @@ public class Post {
 		return this.time;
 	}
 
-	/**
-	 * Gets the end time.
-	 *
-	 * @return the end time
-	 */
-	public long getEndTime(){
-		return this.endTime;
-	}
-
 
 	/**
 	 * Gets the user id.
 	 *
 	 * @return the user id
 	 */
-	public String getUserId(){
-		return this.userID;
+	public User getUser(){
+		return this.username;
 	}
 
 	/**
@@ -268,14 +161,7 @@ public class Post {
 		this.time = time;
 	}
 
-	/**
-	 * Sets the end time.
-	 *
-	 * @param endTme the new end time
-	 */
-	public void setEndTime(long endTme){
-		this.endTime = endTime;
-	}
+
 	
 	/**
 	 * Sets the post to deleted.
@@ -283,24 +169,9 @@ public class Post {
 	 * @param endTme the new end time
 	 */
 	public void delete(){
-		this.deleted = true;
+		//implement
 	}
 	
-	
-	/**
-	 * Sets the spam count.
-	 *
-	 * 
-	 */
-	public void addToSpamCount(int spamCount){
-		this.spamCount += spamCount;
-	}
-	
-	/** marks post as spam **/
-	public void spam(){
-		this.spam = true;
-	}
-
 	/**
 	 * Save new post to database.
 	 *
@@ -349,15 +220,6 @@ public class Post {
 
 	}
 
-	/**
-	 * Id generator.
-	 *
-	 * @return the string
-	 */
-	private String idGenerator() {
-		SecureRandom random = new SecureRandom();
-		return new BigInteger(130, random).toString(32);
-	}
 
 	/**
 	 * Delete post from database.
@@ -385,20 +247,6 @@ public class Post {
 	}
 
 
-	/**
-	 * Checks if is user's post.
-	 *
-	 * @param user the user
-	 * @return true, if is user post
-	 */
-	public boolean isUserPost(User user){
-		if(this.userID.equals(user.getUserID())){
-			return true;
-		}
-
-		return false;
-	}
-
 
 	/**
 	 * Gets the post info.
@@ -424,10 +272,8 @@ public class Post {
 		userMap.put("title", titleNew);
 		userMap.put("content", contentNew);
 		userMap.put("time", ""+this.time);
-		userMap.put("userID", this.userID);
-		userMap.put("endTime", ""+this.endTime);
-		userMap.put("deleted", Boolean.toString(this.deleted));
-		userMap.put("spam", Boolean.toString(this.spam));
+		userMap.put("username".getUserName(), this.username);
+		
 		JSONObject json = new JSONObject(userMap);
 
 		System.out.println("=====USER CONVERTED TO JSON=====");
@@ -474,27 +320,5 @@ public class Post {
 		return posts;
 	}
 	
-	public int getPostCountByUser(User user) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		DataBase dataBase = new DataBase();
-		Connection dataBaseConn= null;
-		int count =0;
-		try{
-			dataBaseConn = dataBase.getConnection();
-
-			String command ="SELECT * FROM Post WHERE userID='"+user.getUserID()+"'";
-
-			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
-
-			while(rs.next()){
-				rs.getString("title");
-				count++;
-			}
-
-		}finally{
-			dataBaseConn.close();
-		}
-
-		return count;
-	}
 
 }

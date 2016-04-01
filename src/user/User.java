@@ -88,18 +88,10 @@ public class User {
 			ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
 			while(rs.next()){
 				this.userID = rs.getString("userID");
-				this.firstName = rs.getString("firstName");
-				this.lastName = rs.getString("lastName");
 				this.email = rs.getString("email");
 				this.password = rs.getString("password");
 				this.userName = rs.getString("userName");
-				this.bio = rs.getString("bio").replace("'", "''");
-				this.spamCount = Integer.parseInt(rs.getString("spamCount"));
 
-				Message newMessage = new Message();
-				this.messageCount = newMessage.getNewMessageCountByUser(this);
-				Post newPost = new Post();
-				this.postCount = newPost.getPostCountByUser(this);
 			}
 
 			System.out.println("=====USER CREATED FROM DATABASE=====");
