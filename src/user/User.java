@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,19 +31,9 @@ import post.Post;
 
 public class User {
 
-	static final int MAX_SPAM_COUNT=3;
 
-	/** The user id. */
-	//generated server side
-	private String userID;
-
-	/** The first name. */
-	//passed by app
-	private String firstName;
-
-	/** The last name. */
-	private String lastName;
-
+	/** The user name. */
+	private String username;
 
 	/** The email. */
 	private String email;
@@ -50,58 +41,31 @@ public class User {
 	/** The password. */
 	private String password;
 
-	/** The user name. */
-	private String userName;
+	/** Karma for links*/
+	private int linkKarma;
+	
+	/** Karma for posts*/
+	private int postKarma;
 
-	private String bio;
-
-	/** The number of new messages. */
-	private int messageCount;
-
-	/** The number of user posts. */
-	private int postCount;
-
-	/** The number spam reports. */
-	private int spamCount;
-
+	private Date dateCreated;
 	/**
 	 * Instantiates a new user.
 	 *
-	 * @param firstName: user first name
-	 * @param lastName: user last name
-	 * @param latitude: user latitude
-	 * @param longitude: user longitude
 	 * @param email: user email
 	 * @param password: user password
-	 * @param userName: user name
-	 * @param work: user place of work
+	 * @param username: user name
 	 * @throws SQLException 
 	 * @throws ClassNotFoundException 
 	 * @throws IllegalAccessException 
 	 * @throws InstantiationException 
 	 */
-	public User(String firstName, String lastName, double latitude, double longitude, 
-			String email, String password, String userName, String bio) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+	public User(String email, String password, String username) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
 
-		if (bio.contains("'") || email.contains("'")) 
-		{
-			bio = bio.replace("'", "''");
-			email = email.replace("'", "''");
-		}
-
-		this.userID = idGenerator();
-		this.firstName = firstName;
-		this.lastName = lastName;
 		this.email = email;
-		this.password = hashPassword(password+this.userID);
-		this.userName = userName;
-		this.bio = bio;
-
-		Message newMessage = new Message();
-		this.messageCount = newMessage.getNewMessageCountByUser(this);
-		Post newPost = new Post();
-		this.postCount = newPost.getPostCountByUser(this);
-
+		this.password = password;
+		this.username = username;
+		this.dateCreated = new Date();
+		
 		System.out.println("=====Generated New User=====");
 
 	}
@@ -161,25 +125,6 @@ public class User {
 	}
 
 
-	/**
-	 * Gets the first name.
-	 *
-	 * @return the first name
-	 */
-	//getters
-	public String getfirstName(){
-		return this.firstName;
-	}
-
-	/**
-	 * Gets the last name.
-	 *
-	 * @return the last name
-	 */
-	public String getlastName(){
-		return this.lastName;
-	}
-
 
 	/**
 	 * Gets the email.
@@ -204,46 +149,11 @@ public class User {
 	 *
 	 * @return the user name
 	 */
-	public String getuserName(){
-		return this.userName;
+	public String getusername(){
+		return this.username;
 	}
 
-	/**
-	 * Gets the bio.
-	 *
-	 * @return the bio
-	 */
-	public String getBio(){
-		return this.bio;
-	}
 
-	/**
-	 * Gets the user id.
-	 *
-	 * @return the user id
-	 */
-	public String getUserID(){
-		return this.userID;
-	}
-
-	/**
-	 * Sets the first name.
-	 *
-	 * @param firstName the new first name
-	 */
-	//setters
-	public void setfirstName(String firstName){
-		this.firstName = firstName;
-	}
-
-	/**
-	 * Sets the last name.
-	 *
-	 * @param lastName the new last name
-	 */
-	public void setlastName(String lastName){
-		this.lastName = lastName;
-	}
 
 
 	/**
@@ -252,10 +162,7 @@ public class User {
 	 * @param email the new email
 	 */
 	public void setemail(String email){
-		if (email.contains("'")) 
-		{
-			email = email.replace("'", "''");
-		}
+
 		this.email = email;
 	}
 
@@ -265,42 +172,9 @@ public class User {
 	 * @param password the new password
 	 */
 	public void setpassword(String password){
-		this.password = hashPassword(password+this.userID);
+		this.password = password;
 	}
 
-	/**
-	 * Sets the user name.
-	 *
-	 * @param userName the new user name
-	 */
-	public void setuserName(String userName){
-		this.userName = userName;
-	}
-
-	/**
-	 * Sets the bio.
-	 *
-	 * @param bio the new bio
-	 */
-	public void setBio(String bio){
-		if (bio.contains("'")) 
-		{
-			bio = bio.replace("'", "''");
-		}
-		this.bio = bio;
-	}
-
-	/**
-	 * Adds one to the user's spam count
-	 * @throws SQLException 
-	 * @throws ClassNotFoundException 
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
-	 */
-	public void addToSpamCount(int spamValue) throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
-		this.spamCount +=spamValue;
-		this.update();
-	}
 
 
 	/**
@@ -367,25 +241,9 @@ public class User {
 
 		Map<String,String> userMap = new HashMap<String, String>();
 
-		String emailNew = null;
-		String bioNew = null;
-		if(this.email.contains("''") || this.bio.contains("''")){
-			emailNew = this.email.replace("''", "'");
-			bioNew = this.bio.replace("''", "'");
-		}else{
-			emailNew = this.email;
-			bioNew = this.bio;
-		}
-
-
-		userMap.put("userID", this.userID);
-		userMap.put("firstName", this.firstName);
-		userMap.put("lastName", this.lastName);
-		userMap.put("email", emailNew);
-		userMap.put("userName",this.userName);
-		userMap.put("bio", bioNew);
-		userMap.put("messageCount", ""+messageCount);
-		userMap.put("postCount", ""+postCount);
+	
+		userMap.put("email", this.email);
+		userMap.put("username", this.username);
 
 		JSONObject json = new JSONObject(userMap);
 
@@ -497,45 +355,6 @@ public class User {
 
 	
 
-
-	 /**
-	  * Get userImage from database.
-	  *
-	  * @throws SQLException the SQL exception
-	  * @throws InstantiationException the instantiation exception
-	  * @throws IllegalAccessException the illegal access exception
-	  * @throws ClassNotFoundException the class not found exception
-	  */
-	 public Map<String, String> getUserImageFromDatabase() throws SQLException, InstantiationException, IllegalAccessException, ClassNotFoundException{
-		 Map<String, String> picArray = new HashMap();
-
-		 DataBase dataBase = new DataBase();
-
-		 Connection dataBaseConn = dataBase.getConnection();
-
-		 String command ="SELECT * FROM `electro956_db`.`UserImage` WHERE userID='"+this.userID+"';";
-		 
-
-
-		 ResultSet rs = dataBase.getDataBaseInfo(dataBaseConn, command);
-
-		 while(rs.next()){
-			 String imageBase64Small= rs.getString("userImageSmall");
-			 String imageBase64Large= rs.getString("userImageLarge");
-
-			 picArray.put("userImageSmall", imageBase64Small);
-			 picArray.put("userImageLarge", imageBase64Large);
-			 picArray.put("firstName", this.firstName);
-			 picArray.put("lastName", this.lastName);
-		 }
-
-		 System.out.println("=====USER IMAGE FETCHED FROM DATABASE=====");
-
-		 return picArray;
-	 }
-
-
-
 	 /**
 	  * Verify password.
 	  *
@@ -551,16 +370,4 @@ public class User {
 		 return false;
 	 }
 
-	 /**
-	  * Checks user is not spammy.
-	  *
-	  * @return true, if ok to pass
-	  */
-	 public boolean spamCheck(){
-
-		 if(this.spamCount<=MAX_SPAM_COUNT){
-			 return true;
-		 }
-		 return false;
-	 }
 }

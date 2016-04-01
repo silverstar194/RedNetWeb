@@ -42,19 +42,19 @@ import java.util.Properties;
 public class DataBase {
 
 	/** The name of the MySQL account to use (or empty for anonymous) */
-	private final String userName = "reddit_bot";
+	private final String userName = Config.userName;
 
 	/** The password for the MySQL account (or empty for anonymous) */
-	private final String password = "reddit_bot";
+	private final String password = Config.password;
 
 	/** The name of the computer running MySQL */
-	private final String serverName = "localhost";
+	private final String serverName = Config.serverName;
 
 	/** The port of the MySQL server (default is 3306) */
-	private final int portNumber = 3306;
+	private final int portNumber = Config.portNumber;
 
 	/** The name of the database we are testing with (this default is installed with MySQL) */
-	private final String dbName = "mydb";
+	private final String dbName = Config.dbName;
 
 //	/** The name of the MySQL account to use (or empty for anonymous) */
 //	private final String userName = "root";
